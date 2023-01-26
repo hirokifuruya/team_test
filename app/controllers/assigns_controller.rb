@@ -2,6 +2,7 @@ class AssignsController < ApplicationController
   before_action :authenticate_user!
   before_action :email_exist?, only: [:create]
   before_action :user_exist?, only: [:create]
+  before_action :user_check, only: [:destroy]
 
   def create
     team = find_team(params[:team_id])
@@ -16,9 +17,15 @@ class AssignsController < ApplicationController
 
   def destroy
     assign = Assign.find(params[:id])
-    destroy_message = assign_destroy(assign, assign.user)
-
-    redirect_to team_url(params[:team_id]), notice: destroy_message
+    if assign.user == assign.team.owner
+      destroy_message = assign_destroy(assign, assign.user)
+      redirect_to team_url(params[:team_id]), notice: destroy_message
+    elsif assign.user == current_user
+      destroy_message = assign_destroy(assign, assign.user)
+      redirect_to team_url(params[:team_id]), notice: destroy_message
+    else
+      redirect_to team_url(params[:team_id]), notice: "権限がありません"
+    end
   end
 
   private
