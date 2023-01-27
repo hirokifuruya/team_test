@@ -38,6 +38,13 @@ class TeamsController < ApplicationController
     end
   end
 
+  def chengeowner
+    @team = Team.friendly.find(params[:id])
+    @team.update(owner_id:params[:format])
+    OwnerChengeMailer.owner_chenge_mailer(@team).deliver
+    redirect_to @team, notice: I18n.t('views.messages.update_team')
+  end
+
   def destroy
     @team.destroy
     redirect_to teams_url, notice: I18n.t('views.messages.delete_team')
